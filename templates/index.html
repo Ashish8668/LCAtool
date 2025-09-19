@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Circularity Cockpit - LCA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+
+  <!-- Header -->
+  <header class="bg-white border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
+      <div class="w-10 h-10 rounded bg-indigo-600 flex items-center justify-center text-white font-bold">CC</div>
+      <div>
+        <div class="text-lg font-semibold">Circularity LCA tool</div>
+        <div class="text-xs text-gray-500">AI-assisted LCA & Circularity for metals</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-12 gap-6">
+
+    <!-- Sidebar Form -->
+    <aside class="col-span-3">
+      <div class="bg-white p-4 rounded-2xl shadow-sm">
+        <h3 class="text-lg font-semibold">LCA Input</h3>
+        <form action="/predict" method="POST" class="mt-3 grid gap-3">
+          <label class="text-xs text-gray-500">Material</label>
+          <input name="Material" class="border p-2 rounded text-sm" required/>
+
+          <label class="text-xs text-gray-500">Source %</label>
+          <input name="Source_%" type="number" step="any" class="border p-2 rounded text-sm" required/>
+
+          <label class="text-xs text-gray-500">Quantity (tons)</label>
+          <input name="Quantity_tons" type="number" step="any" class="border p-2 rounded text-sm" required/>
+
+          <label class="text-xs text-gray-500">Ore Grade %</label>
+          <input name="Ore_Grade_%" type="number" step="any" class="border p-2 rounded text-sm" required/>
+
+          <label class="text-xs text-gray-500">Energy %</label>
+          <input name="Energy_%" type="number" step="any" class="border p-2 rounded text-sm" required/>
+
+          <label class="text-xs text-gray-500">Transport Mode</label>
+          <select name="Transport_Mode" class="border p-2 rounded text-sm" required>
+          <option value="Truck">Truck</option>
+          <option value="Rail">Rail</option>
+          <option value="Ship">Ship</option>
+          </select>
+
+          <label class="text-xs text-gray-500">Distance (km)</label>
+          <input name="Distance_km" type="number" step="any" class="border p-2 rounded text-sm" required/>
+
+          <label class="text-xs text-gray-500">Smelting Efficiency %</label>
+          <input name="Smelting_Efficiency_%" type="number" step="any" class="border p-2 rounded text-sm" required/>
+
+          <button type="submit" class="mt-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Predict</button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Add this inside your Main Results section (col-span-9) -->
+<main class="col-span-9 space-y-4">
+
+  {% if prediction %}
+  <!-- Top KPIs Grid -->
+  <div class="grid grid-cols-4 gap-4">
+    <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col">
+      <div class="text-xs text-gray-500">Carbon Footprint (kgCO₂)</div>
+      <div class="text-2xl font-semibold mt-2">{{ prediction["Carbon_Footprint_kgCO2"] }}</div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col">
+      <div class="text-xs text-gray-500">Water Use (m³)</div>
+      <div class="text-2xl font-semibold mt-2">{{ prediction["Water_Use_m3"] }}</div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col">
+      <div class="text-xs text-gray-500">Energy Intensity (MJ)</div>
+      <div class="text-2xl font-semibold mt-2">{{ prediction["Energy_Intensity_MJ"] }}</div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col">
+      <div class="text-xs text-gray-500">Land Disturbance (m²)</div>
+      <div class="text-2xl font-semibold mt-2">{{ prediction["Land_Disturbance_m2"] }}</div>
+    </div>
+  </div>
+
+  <!-- Second Row -->
+  <div class="grid grid-cols-4 gap-4 mt-4">
+    <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col">
+      <div class="text-xs text-gray-500">Reuse %</div>
+      <div class="text-2xl font-semibold mt-2">{{ prediction["Reuse_%"] }}</div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col">
+      <div class="text-xs text-gray-500">Recycle %</div>
+      <div class="text-2xl font-semibold mt-2">{{ prediction["Recycle_%"] }}</div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col">
+      <div class="text-xs text-gray-500">Global Warming Potential</div>
+      <div class="text-2xl font-semibold mt-2">{{ prediction["Global_Warming_Potential"] }}</div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col">
+      <div class="text-xs text-gray-500">End of Life Score</div>
+      <div class="text-2xl font-semibold mt-2">{{ prediction["End_of_Life_Score"] }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+ 
+<!-- Gemini Recommendations after prediction -->
+{% if recommendations %}
+<div class="bg-green-50 p-4 rounded-2xl shadow-sm mt-4">
+  <h3 class="text-lg font-semibold text-green-800">AI Recommendations</h3>
+  <p class="text-sm text-gray-700 whitespace-pre-line">{{ recommendations }}</p>
+</div>
+{% endif %}
+
+<!-- Chatbot Section -->
+<div class="bg-white p-4 rounded-2xl shadow-sm mt-6">
+  <h3 class="text-lg font-semibold">Chatbot Assistant</h3>
+  <div id="chatbox" class="h-48 overflow-y-auto border p-2 mb-2 bg-gray-50">
+    {% if recommendations %}
+      <p><b>Bot:</b> {{ recommendations }}</p>
+    {% endif %}
+  </div>
+  <input type="text" id="userInput" placeholder="Ask a question..." class="w-3/4 p-2 border rounded"/>
+  <button onclick="sendMessage()" class="p-2 bg-indigo-600 text-white rounded">Send</button>
+</div>
+<div class="grid grid-cols-2 gap-4 mt-4">
+        {% for name, chart in charts.items() %}
+        <div class="bg-white p-4 rounded shadow">
+          <h3 class="font-medium mb-2">{{ name|capitalize }} Chart</h3>
+          <img src="data:image/png;base64,{{ chart }}" class="w-full rounded" alt="{{ name }} chart" />
+        </div>
+        {% endfor %}
+  </div>
+
+</main>
+
+<script>
+async function sendMessage() {
+    let input = document.getElementById("userInput").value;
+    if(!input.trim()) return;
+    
+    let chatbox = document.getElementById("chatbox");
+    chatbox.innerHTML += `<p><b>You:</b> ${input}</p>`;
+
+    let res = await fetch("/chat_gemini", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({query: input})
+    });
+    let data = await res.json();
+    chatbox.innerHTML += `<p><b>Bot:</b> ${data.answer}</p>`;
+    chatbox.scrollTop = chatbox.scrollHeight;
+    document.getElementById("userInput").value = "";
+}
+</script>
+
+
+  </div>
+
+</body>
+</html>
