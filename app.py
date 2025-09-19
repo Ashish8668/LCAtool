@@ -50,7 +50,7 @@ def create_base64_plot(fig):
 # ------------------ Routes ------------------
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", charts={})
 
 
 @app.route("/chat_gemini", methods=["POST"])
